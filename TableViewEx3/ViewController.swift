@@ -16,6 +16,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 
     @IBOutlet weak var itemTextField: UITextField!
     @IBOutlet weak var listTableView: UITableView!
+    @IBOutlet weak var indexNumber: UITextField!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,8 +25,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         listTableView.dataSource = self
     }
     
+    //index에 값이 있으면 index번째 아래에 텍스트
     @IBAction func addButtonClicked(_ sender: Any) {
-        DataStoragr.itemArray.append(itemTextField.text!)
+        if let rowNumber = Int(insertIndexNumber.text!) {
+            DataStoragr.itemArray.insert(itemTextField.text!, at: rowNumber)
+        } else {
+            DataStoragr.itemArray.append(itemTextField.text!)
+        }
         listTableView.reloadData()
     }
     

@@ -27,8 +27,18 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     //index에 값이 있으면 index번째 아래에 텍스트
     @IBAction func addButtonClicked(_ sender: Any) {
-        if let rowNumber = Int(insertIndexNumber.text!) {
-            DataStoragr.itemArray.insert(itemTextField.text!, at: rowNumber)
+        if let rowNumber = Int(indexNumber.text!) {
+            // rowNumber가 DataStoragr.itemArray +1 보다 작거같나 같은때 실행하도록
+            // 그렇지 않을때는 alert을 띄우기
+            if rowNumber <= DataStoragr.itemArray.count + 1 {
+                DataStoragr.itemArray.insert(itemTextField.text!, at: rowNumber)
+            } else {
+                let alert = UIAlertController(title: "", message: "index값이 잘못되었습니다.", preferredStyle: .alert)
+                let confirm = UIAlertAction(title: "확인", style: .cancel, handler: nil)
+                alert.addAction(confirm)
+                present(alert, animated: true)
+            }
+            // DataStoragr.itemArray.insert(itemTextField.text!, at: rowNumber)
         } else {
             DataStoragr.itemArray.append(itemTextField.text!)
         }

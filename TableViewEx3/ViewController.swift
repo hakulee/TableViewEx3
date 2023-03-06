@@ -7,12 +7,21 @@
 
 import UIKit
 
-struct DataStoragr {
+struct DataStorage {
     static var itemArray: [String] = []
     
 }
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, SendDataDelgate {
+extension UIViewController {
+    func warningMessage(message: String) {
+        let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
+        let confirm = UIAlertAction(title: "확인", style: .cancel, handler: nil)
+        alert.addAction(confirm)
+        present(alert, animated: true)
+    }
+}
+
+class ViewController: UIViewController{
     
     @IBOutlet weak var itemTextField: UITextField!
     @IBOutlet weak var listTableView: UITableView!
@@ -30,56 +39,52 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         listTableView.reloadData()
     }
     
-    func sendData(text: String, index: Int) {
-        DataStoragr.itemArray.append(text)
-    }
-    
-    func isOnlyNumber(_ str: String) -> Bool {
-        return str.filter({ $0.isNumber }).count == str.count
-    }
-    
-    func warningMessage() {
-        let alert = UIAlertController(title: "", message: "index값이 잘못되었습니다.", preferredStyle: .alert)
-        let confirm = UIAlertAction(title: "확인", style: .cancel, handler: nil)
-        alert.addAction(confirm)
-        present(alert, animated: true)
-    }
-    
     @IBAction func addPlusButton(_ sender: Any) {
         guard let detailVC = self.storyboard?.instantiateViewController(withIdentifier: "detailVC") as? DetailViewController else {return}
         detailVC.delegate = self
         present(detailVC, animated: true)
     }
     
-    //index에 값이 있으면 index번째 아래에 텍스트 삽입
     @IBAction func addButtonClicked(_ sender: Any) {
-        // index에 숫자 이외의 값이 들어왔을 때 warningMessage(alert) 띄우기
-        if isOnlyNumber(indexNumber.text!) == false {
-            warningMessage()
-        } else { //index값에 숫자만 들어왔을 때
-            if let rowNumber = Int(indexNumber.text!) {
-                // rowNumber가 (DataStoragr.itemArray.count) 보다 작거같나 같고, text에 무언가 있을때만 추가
-                if rowNumber <= DataStoragr.itemArray.count, itemTextField.text != "" {
-                    DataStoragr.itemArray.insert(itemTextField.text!, at: rowNumber)
+        if let itemText = itemTextField.text, let rowText = indexNumber.text {
+            if let rowNumber = Int(rowText) {
+                if rowNumber <= DataStorage.itemArray.count, !itemText.isEmpty {
+                    DataStorage.itemArray.insert(itemText, at: rowNumber)
+                    listTableView.reloadData()
                 } else {
-                    // 그렇지 않을때는 warningMessage(alert)을 띄우기
-                    warningMessage()
+                    warningMessage(message: "index값이 벗어났거나 item 이름이 비어있습니다.")
                 }
-            } else if itemTextField.text != "" { // index에 아무 값이 없을 때,
-                // TextField 창이 빈칸일 때는 DataStoragr.itemArray에 추가 안함
-                DataStoragr.itemArray.append(itemTextField.text!)
+            } else {
+                if rowText.isEmpty {
+                    DataStorage.itemArray.append(itemText)
+                    listTableView.reloadData()
+                } else {
+                    warningMessage(message: "index값이 잘못되었습니다.")
+                }
             }
-            listTableView.reloadData()
+        } else {
+            warningMessage(message: "텍스트가 존재하지 않습니다.")
         }
     }
     
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let detailVC = self.storyboard?.instantiateViewController(withIdentifier: "detailVC") as? DetailViewController else {return}
+        detailVC.delegate = self
+        present(detailVC, animated: true)
+    }
+}
+
+extension ViewController: UITableViewDelegate { }
+
+extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return DataStoragr.itemArray.count
+        return DataStorage.itemArray.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "listCell", for: indexPath) as? ListTableViewCell else { return UITableViewCell() }
-        cell.nameLabel.text = DataStoragr.itemArray[indexPath.row]
+        cell.nameLabel.text = DataStorage.itemArray[indexPath.row]
         cell.selectionStyle = .none
         return cell
     }
@@ -87,15 +92,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     //delete 방법
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            DataStoragr.itemArray.remove(at: indexPath.row)
+            DataStorage.itemArray.remove(at: indexPath.row)
             listTableView.reloadData()
         }
     }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let detailVC = self.storyboard?.instantiateViewController(withIdentifier: "detailVC") as? DetailViewController else {return}
-        detailVC.delegate = self
-        present(detailVC, animated: true)
+}
+
+extension ViewController: SendDataDelgate {
+    func sendData(text: String, index: Int) {
+        DataStorage.itemArray.append(text)
     }
-    
 }

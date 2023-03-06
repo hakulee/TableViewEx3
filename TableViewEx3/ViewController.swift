@@ -25,9 +25,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         listTableView.dataSource = self
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        listTableView.reloadData()
+    }
+    
     func sendData(text: String, index: Int) {
         DataStoragr.itemArray.append(text)
-        listTableView.reloadData()
     }
     
     func isOnlyNumber(_ str: String) -> Bool {
@@ -87,4 +91,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             listTableView.reloadData()
         }
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let detailVC = self.storyboard?.instantiateViewController(withIdentifier: "detailVC") as? DetailViewController else {return}
+        detailVC.delegate = self
+        present(detailVC, animated: true)
+    }
+    
 }
